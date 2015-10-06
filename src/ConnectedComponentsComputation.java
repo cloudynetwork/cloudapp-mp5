@@ -63,7 +63,7 @@ public class ConnectedComponentsComputation extends
 		  int candidateComponent = message.get();
 		 
 		  if (candidateComponent < currentComponent) {
-			  currentcComponent = candidateComponent;
+			  currentComponent = candidateComponent;
 			  change = true;
 			  
 		  }
@@ -71,7 +71,7 @@ public class ConnectedComponentsComputation extends
 	  
 	  if (change) {
 		  vertex.setValue(new IntWritable(currentComponent));
-		  sendMessagetoAllEdges(vertex, vertex.getValue());
+		  sendMessageToAllEdges(vertex, vertex.getValue());
 		  // Send my new value to all edges. 
 	  }
 	  
