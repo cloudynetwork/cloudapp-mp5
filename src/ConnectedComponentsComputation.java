@@ -25,6 +25,57 @@ public class ConnectedComponentsComputation extends
   public void compute(
       Vertex<IntWritable, IntWritable, NullWritable> vertex,
       Iterable<IntWritable> messages) throws IOException {
-      //TODO
+      
+	  int currentComponent = vertex.getValue().get();
+	  
+	  //Check for first step. Inherited from parent class
+	  if (getSuperstep() == 0 ) {
+		  for (Edge<IntWritable, NullWritable> edge : vertex.getEdges()) {
+			  int neighbour = edge.getTargetVertexId().get(); 
+			  
+			  if (neighbour < currentComponent) {
+				  currentComponent = neighbour;
+			  }
+		  }
+		  //Do the above if step 0 but then check if own ID.
+		  if (currentComponent !=  vertex.getValue().get()) {
+			  vertex.setValue(new IntWritable(currentComponent));
+			  
+			  for (Edge<IntWritable, NullWritable> edge : vertex.getEdges()) {
+				  IntWritable neighbour = edge.getTargetVertexId();
+				  
+				  //If the other vertex has a higher ID send ours!
+				  if (neighbour.get() > currentComponent) {
+					  sendMessage(neighbour, vertex.getValue());
+				  }
+			  }
+		  }
+		  
+		  vertex.voteToHalt();
+		  return; //This is for the first run
+	  }
+	  
+	  // check for smaller ID
+	  boolean change = false; 
+	  
+	  for (IntWritable message : messages) {
+		  
+		  int candidateComponent = message.get();
+		 
+		  if (candidateComponent < currentComponent) {
+			  currentcComponent = candidateComponent;
+			  change = true;
+			  
+		  }
+	  }
+	  
+	  if (change) {
+		  vertex.setValue(new IntWritable(currentComponent));
+		  sendMessagetoAllEdges(vertex, vertex.getValue());
+		  // Send my new value to all edges. 
+	  }
+	  
+	  vertex.voteToHalt(); //This is for the second run. 
+	  
   }
 }
