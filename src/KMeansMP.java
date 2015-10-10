@@ -1,5 +1,6 @@
 import java.util.regex.Pattern;
 
+import org.apache.giraph.io.superstep_output.SynchronizedSuperstepOutput;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -64,6 +65,23 @@ public final class KMeansMP {
 		}
 	}
 	
+	public static class ClusterCars implements PairFunction<Tuple2<String, Vector>, Integer, String> {
+		
+		private KMeansModel model;
+		
+		public ClusterCars(KMeansModel model) {
+			this.model = model;
+		}
+		
+		public Tuple2<Integer, String> call(Tuple2<String, Vector> args) {
+		
+			String title = args._1();
+			Vector point = args._2();
+			int cluster = model.predict(point);
+			
+			return new Tuple2<Integer, String>(cluster, title);
+		}
+	}
 	
 	
     public static void main(String[] args) {
